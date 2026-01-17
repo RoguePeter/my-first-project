@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>社團系統 - 維護中</title>
+    <style>
+        body {
+            background-color: #1a1a1a; /* 深色背景，更有駭客感 */
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #2d2d2d;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            text-align: center;
+            border: 1px solid #444;
+            max-width: 500px;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #555;
+        }
+        /* 重點：這裡設定了「封印」的視覺效果 */
+        .locked-element {
+            cursor: not-allowed; /* 滑鼠移上去會變成紅色禁止符號 */
+            background-color: #555 !important; /* 強制變成深灰色 */
+            color: #aaa !important;
+            border: 1px solid #666;
+        }
+        input {
+            padding: 10px;
+            width: 70%;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        #flagArea {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #004d00;
+            color: #00ff00;
+            border-radius: 5px;
+            display: none; /* 預設隱藏 */
+            border: 1px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🔒 系統維護中</h2>
+    <p>工程師暫時關閉了前端入口，但後端驗證似乎還開著？</p>
+    
+<img src="https://raw.githubusercontent.com/RoguePeter/my-first-project/c18f6bf82b9bed92f2b3b5268f41e1583166f3da/%E8%B3%87%E5%AE%89%E6%AF%94%E8%B3%BD%E7%85%A7%E7%89%87_%E8%A2%AB%E5%B0%81%E5%8D%B0%E7%9A%84%E9%A0%81%E9%9D%A2.jpg" 
+     alt="社課照片" 
+     style="max-width: 300px; width: 100%; height: auto; border-radius: 5px; border: 1px solid #555;">
+
+    <p>題目：請問這張照片是第幾堂社課時玩的遊戲？</p>
+
+    <input type="text" id="answerInput" class="locked-element" disabled placeholder="輸入框已鎖定...">
+    <br>
+    
+    <button id="submitBtn" class="locked-element" disabled onclick="checkAnswer()">提交答案</button>
+
+    <div id="flagArea"></div>
+</div>
+
+<script>
+    function checkAnswer() {
+        const input = document.getElementById("answerInput").value;
+        if (btoa(input) === "NA==") {
+            const secret = "TkhJU0N7RDBNX0luc3AzY3Qwcl9TdWNjM3NzfQ==";
+            document.getElementById("flagArea").style.display = "block";
+            document.getElementById("flagArea").innerHTML = "🎉 驗證通過！Flag: " + atob(secret);
+        } else {
+            alert("❌ 答案錯誤，請再仔細看看照片！");
+        }
+    }
+</script>
+
+</body>
+</html>
