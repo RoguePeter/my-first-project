@@ -127,8 +127,8 @@
     <div id="map"></div>
     
     <div class="controls">
-        <input type="text" id="lat" placeholder="緯度 Lat" readonly>
-        <input type="text" id="lng" placeholder="經度 Lng" readonly>
+        <input type="text" id="lat" placeholder="緯度 Lat">
+        <input type="text" id="lng" placeholder="經度 Lng">
         <button onclick="checkLocation()">📍 驗證座標</button>
     </div>
     
@@ -201,7 +201,35 @@
             resDiv.innerHTML = '❌ 位置錯誤！<br>這裡不是拍攝地點';
         }
     };
+
+    // 4. 監聽輸入框變化：手動輸入座標時，移動圖釘
+    function updateMapFromInput() {
+        var lat = parseFloat(document.getElementById('lat').value);
+        var lng = parseFloat(document.getElementById('lng').value);
+
+        // 確保輸入的是有效數字
+        if (!isNaN(lat) && !isNaN(lng)) {
+            var newLatLng = new L.LatLng(lat, lng);
+            
+            // 移除舊標記
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+            }
+            // 新增標記並移動地圖視角
+            currentMarker = L.marker(newLatLng).addTo(map);
+            map.panTo(newLatLng);
+            
+            // 清空結果訊息
+            document.getElementById('res').className = '';
+            document.getElementById('res').innerHTML = '座標已更新，請驗證。';
+        }
+    }
+
+    // 綁定事件：當輸入框內容改變時觸發
+    document.getElementById('lat').addEventListener('input', updateMapFromInput);
+    document.getElementById('lng').addEventListener('input', updateMapFromInput);
 </script>
 
 </body>
 </html>
+
