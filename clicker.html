@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Million Clicker</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f8f9fa; }
+        #counter { font-size: 60px; margin: 20px 0; font-weight: bold; }
+        button { padding: 15px 50px; font-size: 22px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 50px; }
+    </style>
+</head>
+<body>
+    <h3>🔥 剩餘點擊次數</h3>
+    <div id='counter'>1000000</div>
+    <button onclick='clickMe()'>點擊 -1</button>
+    <script>
+        var remaining = 1000000;
+        function clickMe() {
+            if(remaining > 0) {
+                remaining--;
+                document.getElementById('counter').innerText = remaining;
+            }
+            if (remaining <= 0) {
+                // Flag: NHISC{1_M1ll10n_D0wn_To_Z3r0}
+                var f = 'TmhJU0N7MV9NMWxsMTBuX0Qwd25fVG9fWjNyMH0='; 
+                document.body.innerHTML = '<h2 style="color:green">🎉 Flag: <br>' + atob(f) + '</h2>';
+            }
+        }
+    </script>
+</body>
+</html>
