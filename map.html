@@ -1,73 +1,207 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>OSINT Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地理偵探挑戰</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <style>
-        body { margin: 0; padding: 10px; text-align: center; font-family: 'Microsoft JhengHei', sans-serif; background-color: #fff; }
-        /* 圖片樣式：自適應寬度，最大高度限制，避免佔滿畫面 */
-        img { max-width: 100%; height: auto; max-height: 350px; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* --- 🎨 美化樣式區 --- */
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+        h2 { color: #2c3e50; margin-bottom: 10px; }
+        p { color: #666; font-size: 0.95em; margin-bottom: 20px; }
+        
+        /* 圖片樣式 */
+        .img-box {
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            max-height: 350px;
+            display: block;
+            margin: 0 auto;
+        }
+
         /* 地圖樣式 */
-        #map { width: 100%; height: 400px; border: 2px solid #333; margin: 15px 0; border-radius: 8px; }
-        /* 控制區樣式 */
-        .controls { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 8px; display: inline-block; }
-        input { padding: 8px; width: 100px; margin: 2px; border: 1px solid #ddd; border-radius: 4px; }
-        button { padding: 8px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; }
-        button:hover { background: #0056b3; }
-        #res { margin-top: 10px; font-weight: bold; min-height: 25px; }
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+            z-index: 1; /* 確保地圖不會蓋住其他東西 */
+        }
+
+        /* 輸入框與按鈕區 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        input {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 140px;
+            text-align: center;
+            background: #f9f9f9;
+        }
+        button {
+            padding: 10px 30px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,123,255,0.3);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0,123,255,0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* 結果顯示區 */
+        #res {
+            min-height: 40px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
-    <P>請問小菜是當時拍照時在哪裡?</P>
-    <img src="https://raw.githubusercontent.com/RoguePeter/my-first-project/eb009a45eb8fd94c98349c28dccb24907f2cf8aa/%E8%B3%87%E5%AE%89%E6%AF%94%E8%B3%BD%E7%85%A7%E7%89%87_%E5%B0%8B%E6%89%BE%E6%B6%88%E5%A4%B1%E7%9A%84%E6%94%9D%E5%BD%B1%E5%B8%AB.jpg" alt="請分析這張照片的地點">
+
+<div class="container">
+    <h2>📸 OSINT 地理偵探</h2>
+    <p>這張照片是在哪裡拍攝的？請在地圖上標記並驗證。</p>
     
-    <div id='map'></div>
-    
-    <div class="controls">
-        <p style="margin:0 0 10px 0; font-size:0.9em; color:#555;">在地圖上點選位置，或直接輸入座標</p>
-        <input type='text' id='lat' placeholder='25.xxxx'>
-        <input type='text' id='lng' placeholder='121.xxxx'>
-        <button onclick='check()'>驗證地點</button>
-        <div id='res'></div>
+    <div class="img-box">
+        <img src="view.jpg" alt="目標照片">
     </div>
 
-    <script>
-        // 初始化地圖：預設中心點在台北
-        var m = L.map('map').setView([25.0478, 121.5170], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OSM contributors'
-        }).addTo(m);
+    <div id="map"></div>
+    
+    <div class="controls">
+        <input type="text" id="lat" placeholder="緯度 Lat" readonly>
+        <input type="text" id="lng" placeholder="經度 Lng" readonly>
+        <button onclick="checkLocation()">📍 驗證座標</button>
+    </div>
+    
+    <div id="res">等待驗證...</div>
+</div>
 
-        var k;
-        m.on('click', function(e){
-            if(k) m.removeLayer(k);
-            k = L.marker(e.latlng).addTo(m);
-            document.getElementById('lat').value = e.latlng.lat.toFixed(4);
-            document.getElementById('lng').value = e.latlng.lng.toFixed(4);
-        });
+<script>
+    // 1. 初始化地圖 (預設台北市中心)
+    var map = L.map('map').setView([25.0478, 121.5170], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-        window.check = function(){
-            var la = parseFloat(document.getElementById('lat').value);
-            var ln = parseFloat(document.getElementById('lng').value);
-            
+    var currentMarker = null;
 
-            var tLa = 25.0523, tLn = 121.5440, R = 6371; 
-            var dLa = (la-tLa)*Math.PI/180, dLn = (ln-tLn)*Math.PI/180;
-            var a = Math.sin(dLa/2)*Math.sin(dLa/2) + Math.cos(tLa*Math.PI/180)*Math.cos(la*Math.PI/180)*Math.sin(dLn/2)*Math.sin(dLn/2);
-            var c = 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            var d = R*c;
+    // 2. 點擊地圖事件
+    map.on('click', function(e) {
+        // 移除舊的標記
+        if (currentMarker) {
+            map.removeLayer(currentMarker);
+        }
+        // 新增標記
+        currentMarker = L.marker(e.latlng).addTo(map);
+        
+        // 填入座標到輸入框
+        document.getElementById('lat').value = e.latlng.lat.toFixed(5);
+        document.getElementById('lng').value = e.latlng.lng.toFixed(5);
+        
+        // 清空結果訊息
+        document.getElementById('res').className = '';
+        document.getElementById('res').innerHTML = '已選擇座標，請按下驗證按鈕。';
+    });
+
+    // 3. 驗證邏輯 (全域函式)
+    window.checkLocation = function() {
+        var latField = document.getElementById('lat').value;
+        var lngField = document.getElementById('lng').value;
+        var resDiv = document.getElementById('res');
+
+        if (!latField || !lngField) {
+            alert("請先在地圖上點選一個位置！");
+            return;
+        }
+
+        var userLat = parseFloat(latField);
+        var userLng = parseFloat(lngField);
+
+        var targetLat = 25.0523;
+        var targetLng = 121.5440;
+        
+        var R = 6371; // 地球半徑 (km)
+        var dLat = (userLat - targetLat) * Math.PI / 180;
+        var dLng = (userLng - targetLng) * Math.PI / 180;
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(targetLat * Math.PI / 180) * Math.cos(userLat * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var distance = R * c;
+
+        if (distance <= 0.2) {
+            var flagPrefix = String.fromCharCode(78, 72, 73, 83, 67); 
+            var flagBody = "{NanJing_FuXing_Found_Success}";
             
-            var r = document.getElementById('res');
-            
-            if(d <= 0.2){
-                r.innerHTML = '<span style="color:green; font-size:1.2em; background:#d4edda; padding:5px 15px; border-radius:20px;">🎉 Flag: NHISC{NanJing_FuXing_Station_Found!}</span>';
-            } else {
-                r.innerHTML = '<span style="color:red; font-size:1.1em;">❌ 位置錯誤 (Incorrect Location)</span>';
-            }
-        };
-    </script>
+            resDiv.className = 'success';
+            resDiv.innerHTML = '🎉 恭喜找到地點！<br>Flag: ' + flagPrefix + flagBody;
+        } else {
+            // ❌ 失敗
+            resDiv.className = 'error';
+            resDiv.innerHTML = '❌ 位置錯誤！<br>這裡不是拍攝地點';
+        }
+    };
+</script>
+
 </body>
-
 </html>
