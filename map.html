@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <style>
-        /* --- 🎨 美化樣式區 --- */
         body {
             font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
             background-color: #f0f2f5;
@@ -31,7 +30,6 @@
         h2 { color: #2c3e50; margin-bottom: 10px; }
         p { color: #666; font-size: 0.95em; margin-bottom: 20px; }
         
-        /* 圖片樣式 */
         .img-box {
             background: #eee;
             border-radius: 10px;
@@ -47,17 +45,15 @@
             margin: 0 auto;
         }
 
-        /* 地圖樣式 */
         #map {
             height: 400px;
             width: 100%;
             border-radius: 10px;
             border: 2px solid #e0e0e0;
             margin-bottom: 20px;
-            z-index: 1; /* 確保地圖不會蓋住其他東西 */
+            z-index: 1;
         }
 
-        /* 輸入框與按鈕區 */
         .controls {
             display: flex;
             justify-content: center;
@@ -72,7 +68,7 @@
             font-size: 16px;
             width: 140px;
             text-align: center;
-            background: #f9f9f9;
+            background: #fff; /* 改成白色，比較像可以輸入的樣子 */
         }
         button {
             padding: 10px 30px;
@@ -94,7 +90,6 @@
             transform: translateY(0);
         }
 
-        /* 結果顯示區 */
         #res {
             min-height: 40px;
             padding: 10px;
@@ -136,7 +131,6 @@
 </div>
 
 <script>
-    // 1. 初始化地圖 (預設台北市中心)
     var map = L.map('map').setView([25.0478, 121.5170], 13);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -145,25 +139,30 @@
 
     var currentMarker = null;
 
-    // 2. 點擊地圖事件
+    // 點擊地圖時更新輸入框
     map.on('click', function(e) {
-        // 移除舊的標記
-        if (currentMarker) {
-            map.removeLayer(currentMarker);
-        }
-        // 新增標記
+        if (currentMarker) map.removeLayer(currentMarker);
         currentMarker = L.marker(e.latlng).addTo(map);
-        
-        // 填入座標到輸入框
         document.getElementById('lat').value = e.latlng.lat.toFixed(5);
         document.getElementById('lng').value = e.latlng.lng.toFixed(5);
-        
-        // 清空結果訊息
         document.getElementById('res').className = '';
         document.getElementById('res').innerHTML = '已選擇座標，請按下驗證按鈕。';
     });
 
-    // 3. 驗證邏輯 (全域函式)
+    // 【新增功能】監聽輸入框：手動輸入時移動圖釘
+    function updateMapFromInput() {
+        var lat = parseFloat(document.getElementById('lat').value);
+        var lng = parseFloat(document.getElementById('lng').value);
+        if (!isNaN(lat) && !isNaN(lng)) {
+            var newLatLng = new L.LatLng(lat, lng);
+            if (currentMarker) map.removeLayer(currentMarker);
+            currentMarker = L.marker(newLatLng).addTo(map);
+            map.panTo(newLatLng);
+        }
+    }
+    document.getElementById('lat').addEventListener('input', updateMapFromInput);
+    document.getElementById('lng').addEventListener('input', updateMapFromInput);
+
     window.checkLocation = function() {
         var latField = document.getElementById('lat').value;
         var lngField = document.getElementById('lng').value;
@@ -176,11 +175,10 @@
 
         var userLat = parseFloat(latField);
         var userLng = parseFloat(lngField);
-
         var targetLat = 25.0523;
         var targetLng = 121.5440;
         
-        var R = 6371; // 地球半徑 (km)
+        var R = 6371; 
         var dLat = (userLat - targetLat) * Math.PI / 180;
         var dLng = (userLng - targetLng) * Math.PI / 180;
         var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -192,44 +190,14 @@
         if (distance <= 0.2) {
             var flagPrefix = String.fromCharCode(78, 72, 73, 83, 67); 
             var flagBody = "{NanJing_FuXing_Found_Success}";
-            
             resDiv.className = 'success';
             resDiv.innerHTML = '🎉 恭喜找到地點！<br>Flag: ' + flagPrefix + flagBody;
         } else {
-            // ❌ 失敗
             resDiv.className = 'error';
             resDiv.innerHTML = '❌ 位置錯誤！<br>這裡不是拍攝地點';
         }
     };
-
-    // 4. 監聽輸入框變化：手動輸入座標時，移動圖釘
-    function updateMapFromInput() {
-        var lat = parseFloat(document.getElementById('lat').value);
-        var lng = parseFloat(document.getElementById('lng').value);
-
-        // 確保輸入的是有效數字
-        if (!isNaN(lat) && !isNaN(lng)) {
-            var newLatLng = new L.LatLng(lat, lng);
-            
-            // 移除舊標記
-            if (currentMarker) {
-                map.removeLayer(currentMarker);
-            }
-            // 新增標記並移動地圖視角
-            currentMarker = L.marker(newLatLng).addTo(map);
-            map.panTo(newLatLng);
-            
-            // 清空結果訊息
-            document.getElementById('res').className = '';
-            document.getElementById('res').innerHTML = '座標已更新，請驗證。';
-        }
-    }
-
-    // 綁定事件：當輸入框內容改變時觸發
-    document.getElementById('lat').addEventListener('input', updateMapFromInput);
-    document.getElementById('lng').addEventListener('input', updateMapFromInput);
 </script>
 
 </body>
 </html>
-
