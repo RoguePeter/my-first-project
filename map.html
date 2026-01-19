@@ -41,7 +41,6 @@
         }).addTo(m);
 
         var k;
-        // 點擊地圖時更新座標
         m.on('click', function(e){
             if(k) m.removeLayer(k);
             k = L.marker(e.latlng).addTo(m);
@@ -53,7 +52,7 @@
             var la = parseFloat(document.getElementById('lat').value);
             var ln = parseFloat(document.getElementById('lng').value);
             
-            // 正確答案：南京復興站 (25.0523, 121.5440)
+
             var tLa = 25.0523, tLn = 121.5440, R = 6371; 
             var dLa = (la-tLa)*Math.PI/180, dLn = (ln-tLn)*Math.PI/180;
             var a = Math.sin(dLa/2)*Math.sin(dLa/2) + Math.cos(tLa*Math.PI/180)*Math.cos(la*Math.PI/180)*Math.sin(dLn/2)*Math.sin(dLn/2);
@@ -62,14 +61,13 @@
             
             var r = document.getElementById('res');
             
-            // 判定距離是否小於 0.2 公里
             if(d <= 0.2){
                 r.innerHTML = '<span style="color:green; font-size:1.2em; background:#d4edda; padding:5px 15px; border-radius:20px;">🎉 Flag: NHISC{NanJing_FuXing_Station_Found!}</span>';
             } else {
-                // 這裡改成只顯示錯誤，不提示距離
                 r.innerHTML = '<span style="color:red; font-size:1.1em;">❌ 位置錯誤 (Incorrect Location)</span>';
             }
         };
     </script>
 </body>
+
 </html>
